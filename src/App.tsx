@@ -57,8 +57,8 @@ import {
   History
 } from 'lucide-react';
 
-const SYSTEM_VERSION = "1.5.2";
-const LAST_UPDATE_CODE = "20260102143000";
+const SYSTEM_VERSION = "1.6.0";
+const LAST_UPDATE_CODE = "20260102112700";
 
 const WEEK_DAYS = ['日', '一', '二', '三', '四', '五', '六'];
 const PASTEL_COLORS = [
@@ -405,7 +405,7 @@ const Backend: React.FC<{ user: User, store: any, onLogout: () => void, setAuthV
   const [viewMode, setViewMode] = useState<ViewMode>('card');
   const [maintenanceViewMode, setMaintenanceViewMode] = useState<ViewMode>('card');
   const [systemViewMode, setSystemViewMode] = useState<ViewMode>('card');
-  const [modalMode, setModalMode] = useState<'add' | 'edit' | 'archive_confirm' | 'maintenance_confirm' | 'change_front_pwd' | null>(null);
+  const [modalMode, setModalMode] = useState<'add' | 'edit' | 'archive_confirm' | 'maintenance_confirm' | 'change_front_pwd' | 'init_db_auth' | null>(null);
   const [maintenanceAction, setMaintenanceAction] = useState<'clear' | 'demo' | 'export' | 'import' | null>(null);
   const [sysopCheck, setSysopCheck] = useState({ username: '', password: '' });
   const [newFrontPwd, setNewFrontPwd] = useState('');
@@ -838,6 +838,11 @@ const Backend: React.FC<{ user: User, store: any, onLogout: () => void, setAuthV
                       {LAST_UPDATE_CODE}
                     </div>
                     <p className="text-[10px] text-slate-400 font-bold italic mt-2">系統已由 GitHub 進行版本控管</p>
+                    <div className="pt-4 w-full">
+                      <Button variant="danger" className="w-full py-3 rounded-2xl shadow-lg border-2 border-white" onClick={() => handleOpenModal('init_db_auth')}>
+                        <Sparkles size={16} className="mr-2" /> 初始化資料庫 (載入範例)
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </Card>
@@ -886,6 +891,32 @@ const Backend: React.FC<{ user: User, store: any, onLogout: () => void, setAuthV
               <Input label="管理員帳號" value={sysopCheck.username} onChange={e => setSysopCheck(p => ({ ...p, username: e.target.value }))} />
               <PasswordInput label="管理員密碼" value={sysopCheck.password} onChange={e => setSysopCheck(p => ({ ...p, password: e.target.value }))} />
               <Button type="submit" className="w-full">驗證並更新</Button>
+              <Button type="button" variant="ghost" className="w-full" onClick={() => setModalMode(null)}>取消</Button>
+            </form>
+          )}
+
+          {modalMode === 'init_db_auth' && (
+            <form className="space-y-4" onSubmit={(e) => {
+              e.preventDefault();
+              const authUser = store.verifyBackCredentials(sysopCheck.username, sysopCheck.password);
+              if (authUser && authUser.role === Role.SYSOP) {
+                if (confirm('確定要清除現有資料並匯入範例資料庫嗎？')) {
+                  store.importDemoData();
+                  setModalMode(null);
+                  setSysopCheck({ username: '', password: '' });
+                }
+              } else alert('最高管理員驗證失敗，無法執行初始化。');
+            }}>
+              <div className="p-4 bg-rose-50 border border-rose-100 rounded-2xl mb-2">
+                <div className="flex items-center gap-2 text-rose-600 mb-1">
+                  <AlertTriangle size={18} />
+                  <span className="std-label font-bold">危險操作警告</span>
+                </div>
+                <p className="std-content text-xs text-rose-700">此動作將可能覆蓋現有資料庫內容。執行前請輸入最高管理員 (SYSOP) 憑證以進行核可。</p>
+              </div>
+              <Input label="SYSOP 帳號" value={sysopCheck.username} onChange={e => setSysopCheck(p => ({ ...p, username: e.target.value }))} />
+              <PasswordInput label="SYSOP 密碼" value={sysopCheck.password} onChange={e => setSysopCheck(p => ({ ...p, password: e.target.value }))} />
+              <Button type="submit" variant="danger" className="w-full py-4 text-lg">核可並執行初始化</Button>
               <Button type="button" variant="ghost" className="w-full" onClick={() => setModalMode(null)}>取消</Button>
             </form>
           )}

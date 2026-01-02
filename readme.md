@@ -1,4 +1,4 @@
-# 羿鈞科技 - 靠卡支援管理系統 (v1.5.0)
+# 羿鈞科技 - 靠卡支援管理系統 (v1.6.0)
 
 本專案已最佳化為標準 Vite + React + TypeScript 開發環境，適合在 Antigravity 及本機進行後續開發。
 
@@ -38,7 +38,19 @@
 
 ## 📡 資料儲存說明
 
-目前資料儲存於瀏覽器的 **LocalStorage** 中。雖然原 Request 提到 Firebase，但目前程式碼尚未整合 Firebase SDK。若需使用 Firebase，請在 `src/services/store.ts` 中替換相關邏輯。
+本系統已串接 **Firebase / Firestore** 雲端資料庫。
+設定檔位於 `src/services/firebase.ts`。
+
+## 📜 版本異動紀錄 (Changelog)
+
+### [v1.6.0] - 2026-01-02
+- **新增**: 後台「系統資訊」加入「初始化資料庫」按鈕。
+- **安全性**: 初始化動作需經過 SYSOP 帳號密碼二次驗證。
+- **範例資料**: 擴充 20 筆員工資料、5 家廠商、10 項專案、及跨年度共 30 筆靠卡紀錄。
+- **版本控管**: 整合 `SYSTEM_VERSION` 與 `LAST_UPDATE_CODE` 自動化。
+
+### [v1.5.2] - 2026-01-02
+- **功能**: 基本 Firebase 整合完成。
 
 ---
 祝開發順利！
